@@ -1,35 +1,50 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from "react";
+import Balance from "./components/Balance";
+import History from "./components/History";
+import Transaction from "./components/Transaction";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [transactions, setTransactions] = useState([]);
+
+  useEffect(() => {
+    const storedTransactions = JSON.parse(localStorage.getItem("transactions"));
+    if (storedTransactions) setTransactions(storedTransactions);
+  }, []);
+
+  function handleAddTransaction(transaction) {
+    setTransactions((ts) => {
+      const newTransactions = [...ts, transaction];
+      localStorage.setItem("transactions", JSON.stringify(newTransactions));
+      return newTransactions;
+    });
+  }
+
+  function handleDeleteTransaction(id) {
+    setTransactions((ts) => {
+      const newTransactions = ts.filter((t) => t.id !== id);
+      localStorage.setItem("transactions", JSON.stringify(newTransactions));
+      return newTransactions;
+    });
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="h-screen font-bold  bg-gray-300 py-5 ">
+      <div className="w-1/3 max-h-5/6 m-auto">
+        <h1 className="text-2xl mb-10 text-center">Expense Tracker</h1>
+
+        <Balance transactions={transactions} />
+        <History
+          transactions={transactions}
+          deleteTransaction={handleDeleteTransaction}
+        />
+        <Transaction
+          transactions={transactions}
+          handleAddTransaction={handleAddTransaction}
+          handleDeleteTransaction={handleDeleteTransaction}
+        />
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    </div>
+  );
 }
 
-export default App
+export default App;
